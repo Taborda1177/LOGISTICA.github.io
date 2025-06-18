@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard de Gestión de Transportes (TMS)</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <header class="dashboard-header">
+            <div class="header-content">
+                <i class="fas fa-truck icon-large"></i>
+                <h1>Sistema de Gestión de Transportes</h1>
+                <div class="user-info">
+                    <span class="user-name">Operador TMS</span>
+                    <i class="fas fa-user-circle user-avatar"></i>
+                </div>
+            </div>
+        </header>
+
+        <main class="main-layout-grid">
+            <div id="dashboard-overview" class="dashboard-module active">
+                <div class="center-area">
+                    <section class="map-section">
+                        <h2>Rastreo de Envíos en Vivo</h2>
+                        <div id="dashboardMap"></div>
+                    </section>
+
+                    <section class="table-section">
+                        <h2>Detalle de Envíos</h2>
+                        <div class="table-controls">
+                            <label for="statusFilter">Filtrar por Estado:</label>
+                            <select id="statusFilter">
+                                <option value="Todos">Todos</option>
+                                <option value="En Curso">En Curso</option>
+                                <option value="Entregado">Entregado</option>
+                                <option value="Pendiente">Pendiente</option>
+                            </select>
+                            <input type="text" id="searchInput" placeholder="Buscar...">
+                            <button class="btn btn-primary" id="newShipmentBtn">
+                                <i class="fas fa-plus-circle"></i> Nuevo Envío
+                            </button>
+                        </div>
+                        <div class="scrollable-table-body">
+                            <table class="shipments-table">
+                                <thead>
+                                    <tr>
+                                        <th>ID Envío</th>
+                                        <th>Origen</th>
+                                        <th>Destino</th>
+                                        <th>Estado</th>
+                                        <th>Conductor</th>
+                                        <th>Vehículo</th>
+                                        <th>Entrega Estimada</th>
+                                        <th>Peso</th>
+                                        <th>Volumen</th>
+                                        <th>Última Actualización</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="shipmentsTableBody">
+                                    </tbody>
+                            </table>
+                        </div>
+                    </section>
+
+                    <section class="chart-grid">
+                        <div class="chart-section">
+                            <h2>Envíos por Estado</h2>
+                            <div class="chart-container">
+                                <canvas id="shipmentStatusChart"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="chart-section">
+                            <h2>Origen/Destino Más Frecuente</h2>
+                            <div class="chart-container">
+                                <canvas id="originDestinationChart"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="chart-section">
+                            <h2>Tendencia de Envíos (Últimos 6 meses)</h2>
+                            <div class="chart-container">
+                                <canvas id="shipmentTrendChart"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="chart-section">
+                            <h2>Estado de la Flota</h2>
+                            <div class="chart-container">
+                                <canvas id="fleetStatusChart"></canvas>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+
+            <div id="fleet-management" class="dashboard-module">
+                <div class="center-area">
+                    <section class="fleet-kpis-section summary-widgets">
+                        <h2>KPIs de la Flota</h2>
+                        <div class="kpi-grid">
+                            <div class="kpi-card">
+                                <h3>Vehículos Totales</h3>
+                                <p id="totalVehicles">0</p>
+                            </div>
+                            <div class="kpi-card">
+                                <h3>Vehículos en Ruta</h3>
+                                <p id="vehiclesOnRoute">0</p>
+                            </div>
+                            <div class="kpi-card">
+                                <h3>Vehículos Disponibles</h3>
+                                <p id="vehiclesAvailable">0</p>
+                            </div>
+                            <div class="kpi-card">
+                                <h3>En Mantenimiento</h3>
+                                <p id="vehiclesMaintenance">0</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="table-section fleet-table-section">
+                        <h2>Detalle de la Flota</h2>
+                        <div class="table-controls">
+                            <label for="fleetStatusFilter">Filtrar por Estado:</label>
+                            <select id="fleetStatusFilter">
+                                <option value="Todos">Todos</option>
+                                <option value="Disponible">Disponible</option>
+                                <option value="En Tránsito">En Tránsito</option>
+                                <option value="En Mantenimiento">En Mantenimiento</option>
+                            </select>
+                            <input type="text" id="fleetSearchInput" placeholder="Buscar vehículo...">
+                            <button class="btn btn-primary" id="newVehicleBtn">
+                                <i class="fas fa-plus-circle"></i> Nuevo Vehículo
+                            </button>
+                        </div>
+                        <div class="scrollable-table-body">
+                            <table class="fleet-table">
+                                <thead>
+                                    <tr>
+                                        <th>ID Vehículo</th>
+                                        <th>Placa</th>
+                                        <th>Modelo</th>
+                                        <th>Capacidad (Ton)</th>
+                                        <th>Estado</th>
+                                        <th>Último Mantenimiento</th>
+                                        <th>Kilometraje</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="fleetTableBody">
+                                    </tbody>
+                            </table>
+                        </div>
+                    </section>
+                </div>
+            </div>
+
+            <div id="reports-analytics" class="dashboard-module">
+                <div class="center-area">
+                    <section class="reports-filters-section">
+                        <h2>Filtros de Informes</h2>
+                        <div class="filter-controls">
+                            <div class="form-group">
+                                <label for="reportType">Tipo de Informe:</label>
+                                <select id="reportType">
+                                    <option value="rendimientoRuta">Rendimiento de Ruta</option>
+                                    <option value="entregasTiempo">Entregas a Tiempo</option>
+                                    <option value="eficienciaCombustible">Eficiencia de Combustible</option>
+                                    <option value="costosOperacion">Costos de Operación</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="startDate">Fecha Inicio:</label>
+                                <input type="date" id="startDate">
+                            </div>
+                            <div class="form-group">
+                                <label for="endDate">Fecha Fin:</label>
+                                <input type="date" id="endDate">
+                            </div>
+                            <button class="btn btn-primary" id="generateReportBtn">
+                                <i class="fas fa-play-circle"></i> Generar Informe
+                            </button>
+                            <button class="btn btn-secondary" id="exportReportBtn">
+                                <i class="fas fa-file-excel"></i> Exportar CSV
+                            </button>
+                        </div>
+                    </section>
+
+                    <section class="chart-grid reports-charts-grid">
+                        <div class="chart-section">
+                            <h2>Rendimiento de Ruta</h2>
+                            <div class="chart-container">
+                                <canvas id="routePerformanceChart"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="chart-section">
+                            <h2>Entregas a Tiempo vs. Retrasadas</h2>
+                            <div class="chart-container">
+                                <canvas id="onTimeDeliveryChart"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="chart-section">
+                            <h2>Eficiencia de Combustible (Lts/Km)</h2>
+                            <div class="chart-container">
+                                <canvas id="fuelEfficiencyChart"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="chart-section">
+                            <h2>Top 5 Rutas Más Costosas</h2>
+                            <div class="chart-container">
+                                <canvas id="costliestRoutesChart"></canvas>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="reports-summary-section table-section">
+                        <h2>Resumen del Informe</h2>
+                        <div class="scrollable-table-body">
+                            <table class="reports-summary-table">
+                                <thead>
+                                    <tr>
+                                        <th>Métrica</th>
+                                        <th>Valor</th>
+                                        <th>Tendencia</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="reportsSummaryTableBody">
+                                    </tbody>
+                            </table>
+                        </div>
+                    </section>
+                </div>
+            </div>
+
+            <aside class="detail-panel" id="detailPanel">
+                <button class="close-btn" id="closeDetailPanelBtn">&times;</button>
+                <h3>Detalles del Envío: <span id="detailShipmentId"></span></h3>
+
+                <div class="detail-section">
+                    <h4>Información General</h4>
+                    <p><strong>Origen:</strong> <span id="detailOrigin"></span></p>
+                    <p><strong>Destino:</strong> <span id="detailDestination"></span></p>
+                    <p><strong>Estado:</strong> <span id="detailStatus"></span></p>
+                    <p><strong>Tipo de Carga:</strong> <span id="detailCargoType"></span></p>
+                    <p><strong>Peso:</strong> <span id="detailWeight"></span></p>
+                    <p><strong>Volumen:</strong> <span id="detailVolume"></span></p>
+                </div>
+
+                <div class="detail-section">
+                    <h4>Conductor y Vehículo</h4>
+                    <p><strong>Conductor:</strong> <span id="detailDriver"></span></p>
+                    <p><strong>Contacto:</strong> <span id="detailDriverContact"></span></p>
+                    <p><strong>Placa Vehículo:</strong> <span id="detailVehiclePlate"></span></p>
+                </div>
+
+                <div class="detail-section">
+                    <h4>Fechas Clave</h4>
+                    <p><strong>Fecha de Envío:</strong> <span id="detailShipmentDate"></span></p>
+                    <p><strong>Entrega Estimada:</strong> <span id="detailEstimatedDelivery"></span></p>
+                </div>
+
+                <div class="detail-section">
+                    <h4>Actualización y Progreso</h4>
+                    <p><strong>Última Actualización:</strong> <span id="detailLastUpdate"></span></p>
+                    <p><strong>Próximo Hito:</strong> <span id="detailNextMilestone"></span></p>
+                    <p><strong>Progreso de Ruta:</strong> <span id="detailRouteProgressText">0%</span></p>
+                    <div class="progress-bar-container">
+                        <div id="detailRouteProgressBar" class="progress-bar"></div>
+                    </div>
+                    <p><strong>Desviación/Retraso:</strong> <span id="detailDeviationStatus">Normal</span></p>
+                </div>
+
+                <div class="detail-section">
+                    <h4>Historial de Eventos</h4>
+                    <ul id="detailHistoryList">
+                        </ul>
+                </div>
+
+                <div class="detail-actions">
+                    <button id="actionUpdateStatus" class="btn btn-primary">Actualizar Estado</button>
+                    <button id="actionContactDriver" class="btn btn-secondary">Contactar Conductor</button>
+                    <button id="actionViewDocuments" class="btn btn-info">Ver Documentos</button>
+                    <button id="actionViewOnMap" class="btn btn-primary">Ver en Mapa</button>
+                </div>
+            </aside>
+        </main>
+
+        <nav class="dashboard-nav">
+            <button class="nav-button active" data-module="dashboard-overview">
+                <i class="fas fa-tachometer-alt"></i> Dashboard
+            </button>
+            <button class="nav-button" data-module="fleet-management">
+                <i class="fas fa-truck-moving"></i> Flota
+            </button>
+            <button class="nav-button" data-module="reports-analytics">
+                <i class="fas fa-chart-line"></i> Reportes
+            </button>
+            <button class="nav-button" data-module="settings">
+                <i class="fas fa-cog"></i> Configuración
+            </button>
+        </nav>
+    </div>
+
+    <div id="newShipmentModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal-btn" id="closeNewShipmentModalBtn">&times;</span>
+            <h2>Agregar Nuevo Envío</h2>
+            <form id="newShipmentForm">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="newShipmentId">ID Envío:</label>
+                        <input type="text" id="newShipmentId" required placeholder="Ej: TMS00X">
+                    </div>
+                    <div class="form-group">
+                        <label for="newShipmentOrigin">Origen:</label>
+                        <input type="text" id="newShipmentOrigin" required placeholder="Ej: Bogotá">
+                    </div>
+                    <div class="form-group">
+                        <label for="newShipmentDestination">Destino:</label>
+                        <input type="text" id="newShipmentDestination" required placeholder="Ej: Cali">
+                    </div>
+                    <div class="form-group">
+                        <label for="newShipmentStatus">Estado:</label>
+                        <select id="newShipmentStatus" required>
+                            <option value="Pendiente">Pendiente</option>
+                            <option value="En Curso">En Curso</option>
+                            <option value="Entregado">Entregado</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="newShipmentDriver">Conductor:</label>
+                        <input type="text" id="newShipmentDriver" required placeholder="Ej: Mario Gómez">
+                    </div>
+                    <div class="form-group">
+                        <label for="newShipmentVehiclePlate">Placa Vehículo:</label>
+                        <input type="text" id="newShipmentVehiclePlate" required placeholder="Ej: XYZ-789">
+                    </div>
+                    <div class="form-group">
+                        <label for="newShipmentCargoType">Tipo de Carga:</label>
+                        <select id="newShipmentCargoType" required>
+                            <option value="Carga General">Carga General</option>
+                            <option value="Perecederos">Perecederos</option>
+                            <option value="Frágil">Frágil</option>
+                            <option value="Electrodomésticos">Electrodomésticos</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="newShipmentWeight">Peso (Ton):</label>
+                        <input type="number" id="newShipmentWeight" step="0.1" required placeholder="Ej: 3.0">
+                    </div>
+                    <div class="form-group">
+                        <label for="newShipmentVolume">Volumen (m³):</label>
+                        <input type="number" id="newShipmentVolume" step="0.1" required placeholder="Ej: 20">
+                    </div>
+                    <div class="form-group">
+                        <label for="newShipmentEstimatedDeliveryDate">Fecha Estimada de Entrega:</label>
+                        <input type="date" id="newShipmentEstimatedDeliveryDate" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary form-submit-btn"><i class="fas fa-save"></i> Guardar Envío</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="newVehicleModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal-btn" id="closeNewVehicleModalBtn">&times;</span>
+            <h2>Agregar Nuevo Vehículo</h2>
+            <form id="newVehicleForm">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="newVehicleId">ID Vehículo:</label>
+                        <input type="text" id="newVehicleId" required placeholder="Ej: VEH001">
+                    </div>
+                    <div class="form-group">
+                        <label for="newVehiclePlate">Placa:</label>
+                        <input type="text" id="newVehiclePlate" required placeholder="Ej: XYZ-789">
+                    </div>
+                    <div class="form-group">
+                        <label for="newVehicleModel">Modelo:</label>
+                        <input type="text" id="newVehicleModel" required placeholder="Ej: Camión Grande">
+                    </div>
+                    <div class="form-group">
+                        <label for="newVehicleCapacity">Capacidad (Ton):</label>
+                        <input type="number" id="newVehicleCapacity" step="0.1" required placeholder="Ej: 10.0">
+                    </div>
+                    <div class="form-group">
+                        <label for="newVehicleStatus">Estado:</label>
+                        <select id="newVehicleStatus" required>
+                            <option value="Disponible">Disponible</option>
+                            <option value="En Tránsito">En Tránsito</option>
+                            <option value="En Mantenimiento">En Mantenimiento</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="newVehicleLastMaintenance">Último Mantenimiento:</label>
+                        <input type="date" id="newVehicleLastMaintenance">
+                    </div>
+                    <div class="form-group">
+                        <label for="newVehicleMileage">Kilometraje (km):</label>
+                        <input type="number" id="newVehicleMileage" required placeholder="Ej: 150000">
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary form-submit-btn"><i class="fas fa-save"></i> Guardar Vehículo</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

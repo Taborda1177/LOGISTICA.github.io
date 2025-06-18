@@ -1,0 +1,838 @@
+/* --- VARIABLES DE CSS PARA UNA PALETA DE COLORES MODERNA --- */
+:root {
+    --primary-color: #007bff; /* Azul moderno para acciones principales */
+    --secondary-color: #6c757d; /* Gris para acciones secundarias */
+    --accent-color: #28a745; /* Verde para éxito/positivo */
+    --danger-color: #dc3545; /* Rojo para advertencia/peligro */
+    --info-color: #17a2b8; /* Cian para información */
+    --warning-color: #ffc107; /* Amarillo para advertencias */
+
+    --text-color: #e0e0e0; /* Color principal del texto */
+    --light-text-color: #f8f9fa; /* Color de texto más claro para encabezados, etc. */
+    --placeholder-color: rgba(255, 255, 255, 0.4); /* Color para placeholders de inputs */
+
+    --dark-bg: #2b2e31; /* Fondo para tarjetas/secciones */
+    --darker-bg: #1e2124; /* Fondo principal del body/header/sidebar */
+    --card-bg-light: #343a40; /* Un tono ligeramente más claro para algunas tarjetas/list items */
+
+    --border-color: rgba(255, 255, 255, 0.1); /* Borde sutil */
+    --shadow-color: rgba(0, 0, 0, 0.3); /* Sombra más suave */
+    --sidebar-width: 280px; /* Ancho del sidebar */
+}
+
+/* --- ESTILOS GLOBALES Y DE DISEÑO DE PÁGINA --- */
+html, body {
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(to bottom right, #1a1a1a, #222222);
+    color: var(--text-color);
+    overflow: hidden; /* IMPORTANTE: Evita scrolls no deseados en todo el body. El scroll lo manejarán los hijos. */
+}
+
+.dashboard-container {
+    width: 100%;
+    height: 100%;
+    background-color: var(--darker-bg);
+    box-shadow: 0 5px 15px var(--shadow-color);
+    border-radius: 0;
+    display: flex;
+    flex-direction: column; /* Organiza header, main y nav en columna */
+    overflow: hidden; /* Asegura que el contenido interno no se desborde fuera del contenedor principal */
+}
+
+/* --- ENCABEZADO DEL DASHBOARD --- */
+.dashboard-header {
+    background-color: #333333;
+    color: #fff;
+    text-align: center;
+    padding: 15px 20px;
+    border-bottom: 1px solid #444;
+    flex-shrink: 0; /* Asegura que el header no se encoja */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.header-content {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.header-content h1 {
+    margin: 0;
+    font-size: 1.8em;
+    flex-grow: 1;
+    text-align: center;
+}
+
+.icon-large {
+    font-size: 1.5em;
+    margin-right: 15px;
+    color: var(--primary-color);
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.user-name {
+    font-weight: 500;
+    color: var(--light-text-color);
+}
+
+.user-avatar {
+    font-size: 1.8em;
+    color: var(--secondary-color);
+}
+
+/* --- CONTENEDOR PRINCIPAL DEL LAYOUT CON GRID --- */
+.main-layout-grid {
+    display: grid;
+    /* Ahora es una sola columna para el contenido principal, el sidebar es fijo/superpuesto */
+    grid-template-columns: 1fr;
+    /* Una fila para el contenido, que ocupará el espacio restante */
+    grid-template-rows: 1fr; /* Ocupa todo el espacio vertical disponible */
+    gap: 20px;
+    padding: 20px;
+    flex-grow: 1; /* Permite que el grid ocupe el espacio restante del dashboard-container */
+    overflow: hidden; /* Gestiona el overflow a través de sus hijos */
+    box-sizing: border-box; /* Incluye padding en el cálculo de la altura */
+}
+
+/* --- MÓDULOS DEL DASHBOARD (CONTENEDORES DEL CONTENIDO PRINCIPAL) --- */
+.dashboard-module {
+    display: none; /* Oculto por defecto */
+    width: 100%;
+    height: 100%; /* Ocupa el 100% del main-layout-grid */
+    flex-direction: column; /* Los hijos (center-area) se apilan */
+    overflow-y: auto; /* *** CRÍTICO: Scroll interno para cada módulo si el contenido es largo *** */
+    box-sizing: border-box; /* Incluye padding en la altura */
+}
+
+.dashboard-module.active {
+    display: flex; /* Mostrar el módulo activo */
+}
+
+/* --- ÁREA CENTRAL (MAPA, TABLA, GRÁFICOS) --- */
+.center-area {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    flex-grow: 1; /* Permite que center-area ocupe el espacio disponible en su módulo */
+    min-height: 0; /* Asegura que el flex item no impida el encogimiento */
+    padding-right: 10px; /* Espacio para la barra de scroll si el .dashboard-module lo usa */
+    box-sizing: border-box;
+}
+
+/* --- SECCIONES INDIVIDUALES (MAPA, TABLA, GRÁFICOS) --- */
+.map-section,
+.table-section,
+.chart-section,
+.fleet-kpis-section, /* Añadido */
+.reports-filters-section, /* Añadido */
+.reports-summary-section /* Añadido */ {
+    background-color: var(--dark-bg);
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px var(--shadow-color);
+    color: var(--text-color);
+    flex-shrink: 0; /* Por defecto, no permite que se encojan si hay espacio */
+    box-sizing: border-box;
+}
+
+.map-section {
+    height: 400px; /* Altura fija para el mapa, si esto es lo deseado */
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0; /* Asegura que el mapa siempre tenga su altura fija */
+}
+
+#dashboardMap {
+    flex-grow: 1; /* Hace que el mapa ocupe el espacio restante en la sección */
+    border-radius: 4px;
+    margin-top: 10px;
+}
+
+.table-section {
+    display: flex;
+    flex-direction: column;
+    min-height: 300px; /* Altura mínima para la sección de tabla */
+    flex-grow: 1; /* Permite que la tabla crezca y ocupe espacio, pero con scroll interno */
+}
+
+.table-controls {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.table-controls label {
+    font-weight: 500;
+    color: var(--light-text-color);
+}
+
+.table-controls select,
+.table-controls input[type="text"],
+.table-controls input[type="date"] /* Añadido */ {
+    padding: 8px 12px;
+    border-radius: 5px;
+    border: 1px solid var(--border-color);
+    background-color: var(--darker-bg);
+    color: var(--text-color);
+    font-size: 0.9em;
+}
+
+.table-controls button {
+    padding: 8px 15px;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.table-controls .btn-primary {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.table-controls .btn-primary:hover {
+    background-color: #0056b3;
+    transform: translateY(-2px);
+}
+
+.table-controls .btn-secondary { /* Añadido para el botón de exportar */
+    background-color: var(--secondary-color);
+    color: white;
+}
+
+.table-controls .btn-secondary:hover { /* Añadido para el botón de exportar */
+    background-color: #5c636a;
+    transform: translateY(-2px);
+}
+
+.table-container {
+    overflow-x: auto;
+}
+
+.shipments-table,
+.fleet-table, /* Añadido */
+.reports-summary-table /* Añadido */ {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+.shipments-table th,
+.shipments-table td,
+.fleet-table th, /* Añadido */
+.fleet-table td, /* Añadido */
+.reports-summary-table th, /* Añadido */
+.reports-summary-table td /* Añadido */ {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.shipments-table th,
+.fleet-table th, /* Añadido */
+.reports-summary-table th /* Añadido */ {
+    background-color: var(--card-bg-light);
+    color: var(--light-text-color);
+    font-weight: 600;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+
+.shipments-table tbody tr:hover,
+.fleet-table tbody tr:hover, /* Añadido */
+.reports-summary-table tbody tr:hover /* Añadido */ {
+    background-color: rgba(255, 255, 255, 0.05);
+    cursor: pointer;
+}
+
+.status-en-curso { color: var(--info-color); font-weight: bold; }
+.status-entregado { color: var(--accent-color); font-weight: bold; }
+.status-pendiente { color: var(--danger-color); font-weight: bold; }
+
+/* Para tabla de flota */
+.status-disponible { color: var(--accent-color); font-weight: bold; }
+.status-en-transito { color: var(--info-color); font-weight: bold; }
+.status-en-mantenimiento { color: var(--warning-color); font-weight: bold; }
+
+.scrollable-table-body {
+    max-height: 400px; /* Altura máxima para el cuerpo de la tabla antes de hacer scroll */
+    overflow-y: auto; /* Permite el scroll vertical dentro del cuerpo de la tabla */
+    position: relative;
+    flex-grow: 1; /* Permite que el cuerpo de la tabla ocupe espacio dentro de .table-section */
+}
+
+/* Estilos de la barra de scroll */
+.scrollable-table-body::-webkit-scrollbar {
+    width: 8px;
+    background-color: var(--darker-bg);
+}
+
+.scrollable-table-body::-webkit-scrollbar-thumb {
+    background-color: var(--secondary-color);
+    border-radius: 4px;
+}
+
+.scrollable-table-body::-webkit-scrollbar-thumb:hover {
+    background-color: #888;
+}
+
+.chart-grid {
+    display: grid;
+    grid-template-columns: 1fr; /* Una columna por defecto */
+    gap: 20px;
+}
+
+@media (min-width: 768px) {
+    .chart-grid {
+        grid-template-columns: 1fr 1fr; /* Dos columnas en pantallas más grandes */
+    }
+}
+
+/* --- SECCIÓN DE CADA GRÁFICO INDIVIDUAL --- */
+.chart-section {
+    background-color: var(--dark-bg);
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px var(--shadow-color);
+    display: flex; /* Para organizar el h2 y el chart-container */
+    flex-direction: column;
+    min-height: 280px; /* Altura mínima para cada gráfico */
+    max-height: 450px; /* Altura máxima para cada gráfico */
+    overflow: hidden; /* Oculta cualquier desbordamiento a nivel de la tarjeta del gráfico */
+    box-sizing: border-box;
+}
+
+.chart-section h2 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    text-align: center;
+    font-size: 1.2em;
+    flex-shrink: 0; /* El título no se encoge */
+}
+
+/* --- CONTENEDOR ESPECÍFICO DEL CANVAS DEL GRÁFICO --- */
+.chart-container {
+    position: relative;
+    height: 100%; /* El contenedor toma la altura disponible de su padre (.chart-section) */
+    width: 100%;
+    display: flex; /* Para centrar/ajustar el canvas dentro */
+    align-items: center; /* Centrar verticalmente el canvas */
+    justify-content: center; /* Centrar horizontalmente el canvas */
+    overflow-y: auto; /* *** CRÍTICO: Scroll interno si el contenido del CANVAS se desborda *** */
+    padding-bottom: 15px; /* Espacio extra para las etiquetas inferiores si se recortan */
+    box-sizing: border-box;
+}
+
+/* Asegura que el canvas no fuerce su propia altura */
+.chart-container canvas {
+    height: 100% !important; /* Fuerza al canvas a ajustarse a la altura de su contenedor */
+    width: 100% !important; /* Fuerza al canvas a ajustarse al ancho de su contenedor */
+    max-height: 100%; /* Asegura que no crezca más allá del 100% */
+}
+
+/* --- SIDEBAR DE DETALLES --- */
+.detail-panel {
+    position: fixed; /* O 'absolute' si está dentro de un contenedor relativo */
+    top: 0;
+    left: -450px; /* Oculto por defecto, ahora desde la izquierda */
+    width: 400px; /* Ancho del panel */
+    height: 95%;
+    background-color: var(--dark-bg);
+    box-shadow: -5px 0 15px var(--shadow-color); /* Sombra hacia la derecha */
+    z-index: 1000;
+    transition: left 0.4s ease-out; /* Transición para 'left' */
+    padding: 20px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+
+
+}
+
+.detail-panel.open {
+    left: 0; /* Muestra el panel */
+}
+
+.close-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: none;
+    border: none;
+    color: var(--text-color);
+    font-size: 1.5em;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.close-btn:hover {
+    color: var(--primary-color);
+}
+
+.detail-panel h3 {
+    color: var(--light-text-color);
+    margin-top: 0;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border-color);
+    font-size: 1.4em;
+}
+
+.detail-section h4 {
+    color: var(--light-text-color);
+    margin-top: 15px;
+    margin-bottom: 10px;
+    font-size: 1.1em;
+}
+
+.detail-section p {
+    margin: 5px 0;
+    font-size: 0.95em;
+}
+
+.detail-section strong {
+    color: var(--primary-color);
+}
+
+.progress-bar-container {
+    background-color: #444;
+    border-radius: 5px;
+    height: 10px;
+    overflow: hidden;
+    margin-top: 5px;
+}
+
+.progress-bar {
+    height: 100%;
+    width: 0%;
+    background-color: var(--accent-color);
+    border-radius: 5px;
+    transition: width 0.5s ease-in-out;
+}
+
+.detail-history-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.detail-history-list li {
+    background-color: var(--card-bg-light);
+    border-left: 3px solid var(--primary-color);
+    padding: 10px;
+    margin-bottom: 8px;
+    border-radius: 4px;
+    font-size: 0.9em;
+}
+
+.detail-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: auto;
+    padding-top: 15px;
+    border-top: 1px solid var(--border-color);
+}
+
+.btn {
+    padding: 10px 15px;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    flex-grow: 1;
+    min-width: 100px;
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+    transform: translateY(-2px);
+}
+
+.btn-secondary {
+    background-color: var(--secondary-color);
+    color: white;
+}
+
+.btn-secondary:hover {
+    background-color: #5c636a;
+    transform: translateY(-2px);
+}
+
+.btn-info {
+    background-color: var(--info-color);
+    color: white;
+}
+
+.btn-info:hover {
+    background-color: #117a8b;
+    transform: translateY(-2px);
+}
+
+/* --- MODAL DE AGREGAR NUEVO ENVÍO --- */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1001;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.6);
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background-color: var(--dark-bg);
+    margin: auto;
+    padding: 30px;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    width: 90%;
+    max-width: 600px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.4);
+    position: relative;
+    animation-name: animatemodal;
+    animation-duration: 0.4s;
+}
+
+@keyframes animatemodal {
+    from {top: -300px; opacity: 0}
+    to {top: 0; opacity: 1}
+}
+
+.modal-content h2 {
+    color: var(--light-text-color);
+    margin-top: 0;
+    margin-bottom: 25px;
+    text-align: center;
+    font-size: 1.8em;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 15px;
+}
+
+.close-modal-btn {
+    color: var(--text-color);
+    position: absolute;
+    top: 15px;
+    right: 25px;
+    font-size: 30px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.close-modal-btn:hover,
+.close-modal-btn:focus {
+    color: var(--danger-color);
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.modal-body {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+}
+
+@media (min-width: 500px) {
+    .modal-body {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--light-text-color);
+    font-weight: 500;
+    font-size: 0.95em;
+}
+
+.form-group input[type="text"],
+.form-group input[type="number"],
+.form-group input[type="date"],
+.form-group select {
+    width: 100%;
+    padding: 12px;
+    border-radius: 5px;
+    border: 1px solid var(--border-color);
+    background-color: var(--darker-bg);
+    color: var(--text-color);
+    font-size: 1em;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.form-group input::placeholder {
+    color: var(--placeholder-color);
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+}
+
+.form-group select {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-image: url('data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2020%2020%22%3E%3Cpath%20fill%3D%22%23cccccc%22%20d%3D%22M9.293%2012.95l.707.707L15.657%208l-1.414-1.414L10%2010.828%206.05%206.879%204.636%208l4.657%204.95z%22%2F%3E%3C%2Fsvg%3E');
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 12px;
+    padding-right: 30px;
+}
+
+.form-submit-btn {
+    width: 100%;
+    padding: 15px;
+    font-size: 1.1em;
+    margin-top: 20px;
+    background-color: var(--accent-color);
+    color: white;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.form-submit-btn:hover {
+    background-color: #218838;
+}
+
+/* --- ESTILOS ESPECÍFICOS PARA EL MÓDULO DE FLOTA --- */
+.fleet-kpis-section {
+    text-align: center;
+}
+.kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.kpi-card {
+    background-color: var(--card-bg-light);
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px var(--shadow-color);
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.kpi-card h3 {
+    margin-top: 0;
+    font-size: 1em;
+    color: var(--light-text-color);
+}
+
+.kpi-card p {
+    font-size: 2.2em;
+    font-weight: 700;
+    color: var(--primary-color);
+    margin-bottom: 0;
+}
+
+/* --- ESTILOS ESPECÍFICOS PARA EL MÓDULO DE INFORMES Y ANÁLISIS --- */
+.reports-filters-section {
+    margin-bottom: 20px;
+}
+
+.reports-filters-section .filter-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    align-items: flex-end; /* Alinea los botones con los campos */
+}
+
+.reports-filters-section .form-group {
+    margin-bottom: 0; /* Anula el margin-bottom predeterminado */
+    flex-grow: 1; /* Permite que los grupos de formulario crezcan */
+    min-width: 180px; /* Ancho mínimo para los campos */
+}
+
+.reports-filters-section .btn {
+    flex-grow: 1; /* Permite que los botones también crezcan */
+    min-width: 150px;
+}
+
+.reports-charts-grid {
+    margin-bottom: 20px; /* Espacio entre los gráficos y la tabla de resumen */
+}
+
+/* No necesitas estilos específicos para .reports-summary-section o .reports-summary-table
+   ya que usan las clases genéricas .table-section y .shipments-table/.fleet-table */
+
+
+/* --- ESTILOS RESPONSIVOS --- */
+@media (max-width: 1023px) {
+    .dashboard-header {
+        flex-direction: column;
+        text-align: center;
+        gap: 10px;
+    }
+
+    .header-content {
+        flex-direction: column;
+    }
+
+    .header-content h1 {
+        font-size: 1.5em;
+    }
+
+    .icon-large {
+        margin-right: 0;
+        margin-bottom: 5px;
+    }
+
+    .user-info {
+        margin-top: 10px;
+    }
+
+    .main-layout-grid {
+        padding-right: 0; /* Quitar padding del scrollbar en móviles, si existe */
+    }
+
+    .dashboard-module {
+        overflow-y: auto; /* Asegura el scroll si el contenido es largo */
+    }
+
+    .map-section {
+        height: auto;
+        min-height: 250px;
+        max-height: 400px;
+        flex-shrink: 0;
+    }
+
+    .chart-section {
+        min-height: 220px; /* Un poco menos de altura mínima en móvil */
+        max-height: 350px; /* Ajuste para evitar que sean muy grandes */
+        overflow: hidden; /* La sección de la tarjeta en sí no debe hacer scroll */
+    }
+
+    .chart-container {
+        overflow-y: auto; /* El contenedor interno del canvas es el que hace scroll si es necesario */
+    }
+
+    .table-section {
+        min-height: auto;
+    }
+    .scrollable-table-body {
+        max-height: 400px; /* Limitar altura de la tabla en móvil para scroll interno */
+    }
+    .table-controls {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    #searchInput, #fleetSearchInput { /* Añadido */
+        width: 100%;
+    }
+    .detail-panel {
+        width: 100%; /* El panel de detalles ocupa todo el ancho en móviles */
+        right: -100%; /* Ocultar completamente */
+        height: 90%; /* Mantener el 90% también en móvil */
+    }
+    .detail-panel.open {
+        right: 0; /* Mostrar completamente */
+    }
+
+    /* Informes Responsivo */
+    .reports-filters-section .filter-controls {
+        flex-direction: column;
+        align-items: stretch; /* Estirar los elementos en columna */
+    }
+    .reports-filters-section .form-group,
+    .reports-filters-section .btn {
+        width: 100%; /* Ocupar todo el ancho disponible */
+        min-width: unset; /* Quitar min-width para que se ajusten bien */
+    }
+}
+
+@media (max-width: 500px) {
+    .modal-content {
+        width: 95%;
+        padding: 20px;
+    }
+
+    .modal-content h2 {
+        font-size: 1.5em;
+        margin-bottom: 15px;
+        padding-bottom: 10px;
+    }
+
+    .form-submit-btn {
+        padding: 12px;
+        font-size: 1em;
+    }
+}
+
+/* --- NAVEGACIÓN INFERIOR DEL DASHBOARD --- */
+.dashboard-nav {
+    display: flex;
+    justify-content: center;
+    background-color: var(--dark-bg);
+    padding: 10px;
+    border-top: 1px solid var(--border-color);
+    flex-shrink: 0; /* Asegura que el nav no se encoja */
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.nav-button {
+    background-color: var(--secondary-color);
+    color: var(--light-text-color);
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+    font-weight: 600;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.nav-button:hover {
+    background-color: #5c636a;
+    transform: translateY(-2px);
+}
+
+.nav-button.active {
+    background-color: var(--primary-color);
+    color: white;
+    box-shadow: 0 2px 5px rgba(0, 123, 255, 0.4);
+}
+
+.nav-button.active:hover {
+    background-color: #0056b3;
+}
